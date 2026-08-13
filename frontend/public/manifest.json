@@ -1,0 +1,10 @@
+{
+  "name": "TravelSphere AI",
+  "short_name": "TravelSphere",
+  "description": "Explore the world, your way — destinations, hotels, activities, and AI-planned itineraries.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0B1120",
+  "theme_color": "#E8934A",
+  "icons": []
+}
