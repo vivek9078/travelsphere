@@ -6,7 +6,8 @@ import { validateTripPlanInput } from "@/lib/trip-planner";
 import type { TripPlanInput } from "@/types";
 
 function todayISO(): string {
-  return new Date().toISOString().slice(0, 10);
+  const tzOffsetMs = new Date().getTimezoneOffset() * 60000;
+  return new Date(Date.now() - tzOffsetMs).toISOString().slice(0, 10);
 }
 
 export default function TripPlanForm({
