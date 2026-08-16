@@ -4,6 +4,11 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { MapPin, Calendar, Users, Search } from "lucide-react";
 
+function todayISO(): string {
+  const tzOffsetMs = new Date().getTimezoneOffset() * 60000;
+  return new Date(Date.now() - tzOffsetMs).toISOString().slice(0, 10);
+}
+
 export default function TravelSearchBar() {
   const router = useRouter();
   const [destination, setDestination] = useState("");
@@ -45,6 +50,7 @@ export default function TravelSearchBar() {
           <input
             type="date"
             value={checkIn}
+            min={todayISO()}
             onChange={(e) => setCheckIn(e.target.value)}
             className="w-full bg-transparent text-sm text-ink outline-none [color-scheme:dark]"
             aria-label="Check-in date"
@@ -55,6 +61,7 @@ export default function TravelSearchBar() {
           <input
             type="date"
             value={checkOut}
+            min={checkIn || todayISO()}
             onChange={(e) => setCheckOut(e.target.value)}
             className="w-full bg-transparent text-sm text-ink outline-none [color-scheme:dark]"
             aria-label="Check-out date"
