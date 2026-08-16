@@ -4,10 +4,9 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { getAllCountries, getCountryBySlug } from "@/lib/mock-data/countries";
 import { getDestinationsByCountry } from "@/lib/mock-data/destinations";
+import { fetchDestinations } from "@/lib/api";
 
-export function generateStaticParams() {
-  return getAllCountries().map((c) => ({ slug: c.slug }));
-}
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
@@ -35,7 +34,13 @@ export default async function CountryPage({ params }: { params: Promise<{ slug: 
   const country = getCountryBySlug(slug);
   if (!country) notFound();
 
-  const destinations = getDestinationsByCountry(country.slug);
+  let destinations;
+  try {
+    const all = await fetchDestinations();
+    destinations = all.filter(d => d.countrySlug === country.slug);
+  } catch (error) {
+    destinations = getDestinationsByCountry(country.slug);
+  }
 
   return (
     <>

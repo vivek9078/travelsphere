@@ -5,14 +5,25 @@ import { getAllDestinations, toDestinationCard } from "@/lib/mock-data/destinati
 import { getAllHotels } from "@/lib/mock-data/hotels";
 import { getAllActivities } from "@/lib/mock-data/activities";
 import { getAllCountries } from "@/lib/mock-data/countries";
+import { fetchDestinations } from "@/lib/api";
 
 export const metadata: Metadata = {
   title: "Explore",
   description: "Search and filter destinations, hotels, and activities across the world.",
 };
 
-export default function ExplorePage() {
-  const destinations = getAllDestinations().map(toDestinationCard);
+export const dynamic = 'force-dynamic';
+
+export default async function ExplorePage() {
+  let destinations;
+  try {
+    const rawDestinations = await fetchDestinations();
+    destinations = rawDestinations.map(toDestinationCard);
+  } catch (error) {
+    // Fallback to local mock data if the API is down
+    destinations = getAllDestinations().map(toDestinationCard);
+  }
+
   const hotels = getAllHotels();
   const activities = getAllActivities();
   const regions = getAllCountries().map((c) => c.name);
