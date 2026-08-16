@@ -81,16 +81,14 @@ export function validateTripPlanInput(input: Partial<TripPlanInput>): string[] {
     errors.push("Please select an end date.");
   }
   if (input.startDate && input.endDate) {
-    const start = new Date(input.startDate);
-    const end = new Date(input.endDate);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const tzOffsetMs = new Date().getTimezoneOffset() * 60000;
+    const todayISO = new Date(Date.now() - tzOffsetMs).toISOString().slice(0, 10);
 
-    if (start < today) {
+    if (input.startDate < todayISO) {
       errors.push("Start date cannot be in the past.");
     }
-    if (end <= start) {
-      errors.push("End date must be after the start date.");
+    if (input.endDate < input.startDate) {
+      errors.push("End date must be on or after the start date.");
     }
   }
   if (!input.people || input.people < 1) {
