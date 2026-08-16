@@ -4,6 +4,8 @@ import { useMemo, useState } from "react";
 import { Plus, Pencil, Trash2, X } from "lucide-react";
 import { useAdminCollection } from "@/hooks/useAdminCollection";
 import { getAllDestinations } from "@/lib/mock-data/destinations";
+import { fetchDestinations } from "@/lib/api";
+import { useEffect, useState as useReactState } from "react";
 import { STORAGE_KEYS } from "@/lib/storage";
 
 type AdminDestination = {
@@ -39,7 +41,26 @@ const emptyForm: Omit<AdminDestination, "id"> = {
 };
 
 export default function DestinationsManager() {
-  const { items, add, update, remove } = useAdminCollection<AdminDestination>(STORAGE_KEYS.adminDestinations, seed);
+  const [localSeed, setLocalSeed] = useReactState<AdminDestination[]>(seed);
+
+  useEffect(() => {
+    fetchDestinations()
+      .then((dests) => {
+        setLocalSeed(dests.map((d) => ({
+          id: d.slug,
+          name: d.name,
+          countryName: d.countryName,
+          heroImage: d.heroImage,
+          bestSeason: d.bestSeason,
+          tripDuration: d.tripDuration,
+          priceFrom: d.priceFrom,
+          rating: d.rating,
+        })));
+      })
+      .catch(() => {});
+  }, []);
+
+  const { items, add, update, remove } = useAdminCollection<AdminDestination>(STORAGE_KEYS.adminDestinations, localSeed);
   const [query, setQuery] = useState("");
   const [country, setCountry] = useState("All");
   const [formOpen, setFormOpen] = useState(false);

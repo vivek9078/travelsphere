@@ -24,18 +24,24 @@ export default function TripPlannerClient() {
     setInterests((prev) => (prev.includes(s) ? prev.filter((i) => i !== s) : [...prev, s]));
   }
 
-  function handleGenerate(e: React.FormEvent) {
+  async function handleGenerate(e: React.FormEvent) {
     e.preventDefault();
     if (!destination.trim()) return;
     setLoading(true);
     setTrip(null);
     // Simulated AI processing — everything is generated locally from
     // templates, there is no external AI API call.
-    setTimeout(() => {
-      const result = generateItinerary({ destination, days, budget, travelStyle: interests[0] ?? "Culture", companions, interests });
-      setTrip(result);
+    try {
+      const result = await generateItinerary({ destination, days, budget, travelStyle: interests[0] ?? "Culture", companions, interests });
+
+      // Artificial delay to simulate thinking
+      setTimeout(() => {
+        setTrip(result);
+        setLoading(false);
+      }, 1600);
+    } catch (e) {
       setLoading(false);
-    }, 1600);
+    }
   }
 
   return (

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { MapPin, Building2, Compass, Receipt, Users, IndianRupee } from "lucide-react";
 import { getAllDestinations } from "@/lib/mock-data/destinations";
+import { fetchDestinations } from "@/lib/api";
 import { getAllHotels } from "@/lib/mock-data/hotels";
 import { getAllActivities } from "@/lib/mock-data/activities";
 import { getBookings } from "@/lib/demo-booking";
@@ -20,9 +21,13 @@ function StatCard({ icon: Icon, label, value }: { icon: typeof MapPin; label: st
 
 export default function AdminOverviewClient() {
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const [destinationCount, setDestinationCount] = useState(getAllDestinations().length);
 
   useEffect(() => {
     setBookings(getBookings());
+    fetchDestinations()
+      .then((d) => setDestinationCount(d.length))
+      .catch(() => setDestinationCount(getAllDestinations().length));
   }, []);
 
   const revenue = bookings.filter((b) => b.status !== "Cancelled").reduce((sum, b) => sum + b.totalPrice, 0);
@@ -37,7 +42,7 @@ export default function AdminOverviewClient() {
         <StatCard icon={Receipt} label="Total bookings" value={bookings.length} />
         <StatCard icon={IndianRupee} label="Revenue" value={`₹${revenue.toLocaleString("en-IN")}`} />
         <StatCard icon={Users} label="Users" value={demoUsers.length} />
-        <StatCard icon={MapPin} label="Destinations" value={getAllDestinations().length} />
+        <StatCard icon={MapPin} label="Destinations" value={destinationCount} />
         <StatCard icon={Building2} label="Hotels" value={getAllHotels().length} />
         <StatCard icon={Compass} label="Activities" value={getAllActivities().length} />
       </div>

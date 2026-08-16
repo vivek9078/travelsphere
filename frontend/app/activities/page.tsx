@@ -3,6 +3,9 @@ import type { Metadata } from "next";
 import ActivitiesClient from "@/components/activities/ActivitiesClient";
 import { getAllActivities } from "@/lib/mock-data/activities";
 import { getDestinationBySlug } from "@/lib/mock-data/destinations";
+import { fetchDestinations } from "@/lib/api";
+
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: "Activities",
@@ -12,9 +15,16 @@ export const metadata: Metadata = {
 export default async function ActivitiesPage({ searchParams }: { searchParams: Promise<{ destination?: string }> }) {
   const sp = await searchParams;
   const activities = getAllActivities();
-  const initialDestination = sp.destination
-    ? getDestinationBySlug(sp.destination)?.name
-    : undefined;
+
+  let initialDestination = undefined;
+  if (sp.destination) {
+    try {
+      const allDestinations = await fetchDestinations();
+      initialDestination = allDestinations.find(d => d.slug === sp.destination)?.name;
+    } catch (e) {
+      initialDestination = getDestinationBySlug(sp.destination)?.name;
+    }
+  }
 
   return (
     <Suspense>

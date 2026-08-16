@@ -13,14 +13,19 @@ import DestinationCard from "@/components/home/DestinationCard";
 import WishlistButton from "@/components/destinations/WishlistButton";
 import ReviewList from "@/components/destinations/ReviewList";
 import { toDestinationCard } from "@/lib/mock-data/destinations";
+import { fetchDestinations } from "@/lib/api";
 
-export function generateStaticParams() {
-  return getAllDestinations().map((d) => ({ slug: d.slug }));
-}
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const d = getDestinationBySlug(slug);
+  let d;
+  try {
+    const all = await fetchDestinations();
+    d = all.find(dest => dest.slug === slug);
+  } catch (error) {
+    d = getDestinationBySlug(slug);
+  }
   if (!d) return {};
   return {
     title: `${d.name} Travel Guide — Things to Do, Hotels & Best Season`,
@@ -31,19 +36,28 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function DestinationPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const d = getDestinationBySlug(slug);
+  let d;
+  let allDestinations = [];
+  try {
+    allDestinations = await fetchDestinations();
+    d = allDestinations.find(dest => dest.slug === slug);
+  } catch (error) {
+    d = getDestinationBySlug(slug);
+    allDestinations = getAll();
+  }
+
   if (!d) notFound();
 
   const hotels = getHotelsByDestination(d.slug);
   const activities = getActivitiesByDestination(d.slug);
   const reviews = getReviewsFor("destination", d.slug, 4);
-  const nearby = getAll()
+  const nearby = allDestinations
     .filter((n) => n.slug !== d.slug && n.countrySlug === d.countrySlug)
     .slice(0, 3)
     .map(toDestinationCard);
   const nearbyFallback = nearby.length > 0
     ? nearby
-    : getAll().filter((n) => n.slug !== d.slug).slice(0, 3).map(toDestinationCard);
+    : allDestinations.filter((n) => n.slug !== d.slug).slice(0, 3).map(toDestinationCard);
 
   return (
     <>

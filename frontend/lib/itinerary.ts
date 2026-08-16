@@ -1,5 +1,6 @@
 import type { GeneratedTrip, ItineraryDay } from "@/types";
 import { getAllDestinations } from "@/lib/mock-data/destinations";
+import { fetchDestinations } from "@/lib/api";
 
 const styleActivityPool: Record<string, string[]> = {
   Adventure: [
@@ -43,17 +44,24 @@ function pick<T>(arr: T[], seed: number): T {
   return arr[seed % arr.length];
 }
 
-export function generateItinerary(params: {
+export async function generateItinerary(params: {
   destination: string;
   days: number;
   budget: string;
   travelStyle: string;
   companions: string;
   interests: string[];
-}): GeneratedTrip {
+}): Promise<GeneratedTrip> {
   const { destination, days, budget, travelStyle, interests } = params;
 
-  const match = getAllDestinations().find(
+  let allDests = [];
+  try {
+    allDests = await fetchDestinations();
+  } catch (e) {
+    allDests = getAllDestinations();
+  }
+
+  const match = allDests.find(
     (d) => d.name.toLowerCase().includes(destination.toLowerCase()) || destination.toLowerCase().includes(d.name.toLowerCase().split(",")[0])
   );
 
